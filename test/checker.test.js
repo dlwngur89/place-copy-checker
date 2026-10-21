@@ -15,4 +15,13 @@ t('대표키워드 공백·빈칸 무시', () => { assert.strictEqual(c.checkKey
 t('이모지 대표키워드 오류', () => { assert.ok(c.checkKeywords(['광안리 😀']).issues.some(i => i.msg.includes('이모지'))); });
 t('보장 표현 감지', () => { assert.ok(c.checkText('무조건 상위노출 해드립니다').issues.length > 0); });
 t('긴 대시 감지', () => { assert.ok(c.checkText('메뉴 — 안내').issues.length > 0); });
+t('병의원 프리셋: 부작용 없음·무통 오류', () => { const r = c.checkText('무통 시술, 부작용 없는 레이저', {}, c.withPreset('clinic')); assert.ok(r.issues.filter(i => i.level === 'error').length >= 2); });
+t('일반 프리셋에서는 무통이 걸리지 않음', () => { assert.ok(!c.checkText('무통 시술').issues.some(i => i.level === 'error')); });
+t('식품 프리셋: 면역력 강화 오류, 면역 단독은 경고', () => { const r = c.checkText('면역력 강화', {}, c.withPreset('food')); assert.ok(r.issues.some(i => i.level === 'error')); assert.ok(!r.issues.some(i => i.level === 'warn' && i.phrase === '면역')); });
+t('표시 위치(marks) 반환', () => { const r = c.checkText('최고의 맛 — 효과 보장'); assert.ok(r.marks.length >= 3); });
+t('키워드 사용 횟수', () => { const u = c.keywordUsage(['광안리 오마카세'], { desc: '광안리 오마카세 코스. 광안리 오마카세 예약' }); assert.strictEqual(u[0].counts.desc, 2); });
+t('키워드 블록 감지', () => { assert.strictEqual(c.detectKeywordBlocks('맛있는 한우집\n#광안리 #광안리맛집 #부산 #오마카세').length, 1); });
+t('자동 수정: 긴 대시·대표키워드 문자 정리', () => { assert.strictEqual(c.autoFixText('메뉴 — 안내'), '메뉴 - 안내'); assert.deepStrictEqual(c.autoFixKeywords('한우·삼겹살, 광안리 😀, 광안리'), ['한우 삼겹살', '광안리']); });
+t('찾아오는길 네비 표기도 인정', () => { assert.ok(!c.checkDirections('도보 3분 차량 진입 네비 검색 주차 가능').issues.some(i => i.code === 'dir-missing')); });
+t('키워드 문자열 입력도 처리', () => { assert.strictEqual(c.checkKeywords('광안리 오마카세, 광안리 데이트').count, 2); });
 console.log(`\n${n} passed`);
