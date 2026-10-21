@@ -24,4 +24,7 @@ t('키워드 블록 감지', () => { assert.strictEqual(c.detectKeywordBlocks('�
 t('자동 수정: 긴 대시·대표키워드 문자 정리', () => { assert.strictEqual(c.autoFixText('메뉴 — 안내'), '메뉴 - 안내'); assert.deepStrictEqual(c.autoFixKeywords('한우·삼겹살, 광안리 😀, 광안리'), ['한우 삼겹살', '광안리']); });
 t('찾아오는길 네비 표기도 인정', () => { assert.ok(!c.checkDirections('도보 3분 차량 진입 네비 검색 주차 가능').issues.some(i => i.code === 'dir-missing')); });
 t('키워드 문자열 입력도 처리', () => { assert.strictEqual(c.checkKeywords('광안리 오마카세, 광안리 데이트').count, 2); });
+t('부정 문맥은 오류에서 제외', () => { const r = c.checkText('치료 목적이 아닙니다', {}, c.withPreset('cosmetics')); assert.ok(!r.issues.some(i => i.level === 'error')); assert.ok(r.issues.some(i => i.code === 'negated')); });
+t('부정이 다른 문장이면 그대로 오류', () => { const r = c.checkText('여드름 치료. 자극이 없지 않습니다', {}, c.withPreset('cosmetics')); assert.ok(r.issues.some(i => i.level === 'error')); });
+t('효과 보장 문장은 여전히 오류', () => { assert.ok(c.checkText('효과 보장 이벤트').issues.some(i => i.level === 'error')); });
 console.log(`\n${n} passed`);
