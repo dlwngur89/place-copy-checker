@@ -8,7 +8,16 @@
 <meta property="og:title" content="플레이스 문구 점검기">
 <meta property="og:description" content="대표키워드·상세설명·찾아오는길, 올리기 전에 30초 점검. 업종별 금지 표현까지.">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<meta name="theme-color" content="#f3efe6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141412" media="(prefers-color-scheme: dark)">
+<meta property="og:url" content="https://dlwngur89.github.io/place-copy-checker/">
+<meta property="og:image" content="https://dlwngur89.github.io/place-copy-checker/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f5e4a'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" media="print" onload="this.media='all'">
 <style>
 :root{
   --paper:#f3efe6;--card:#fffdf8;--ink:#1b1a17;--sub:#5f5a50;--line:#ddd6c8;--soft:#ebe5d8;
@@ -17,7 +26,11 @@
 }
 @media (prefers-color-scheme:dark){:root{--paper:#141412;--card:#1d1c19;--ink:#efeae0;--sub:#a8a193;--line:#34312b;--soft:#26241f;--accent:#5fb595;--accent-ink:#0f1a15;--err:#ff8a7f;--err-bg:#3a1c19;--warn:#f0c065;--warn-bg:#3a2e14;--ok:#6fd0a0;--info:#b6bdc8}}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;color-scheme:light dark}
+button,a,input,textarea{touch-action:manipulation}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.skip{position:absolute;left:-9999px}.skip:focus{left:16px;top:8px;z-index:20;background:var(--ink);color:var(--paper);padding:8px 12px;border-radius:8px}
+h1,h2{text-wrap:balance}
 body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 "Pretendard Variable",Pretendard,"Noto Sans KR",system-ui,sans-serif;word-break:keep-all;overflow-wrap:anywhere}
 a{color:inherit}
 a.btn{text-decoration:none}
@@ -34,6 +47,9 @@ h1{font-size:clamp(32px,6vw,56px);line-height:1.1;letter-spacing:-.03em;margin:v
 .seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
 .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:9px 14px;border-radius:10px;cursor:pointer;min-height:44px}
 .btn:hover{border-color:var(--ink)}
+.btn:active{transform:translateY(1px)}
+.btn.primary:hover{filter:brightness(1.08)}
+.toast button{margin-left:10px;background:transparent;border:1px solid currentColor;color:inherit;border-radius:6px;padding:2px 8px;font:inherit;cursor:pointer;pointer-events:auto}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn.ghost{border-color:transparent;background:transparent;text-decoration:underline;text-underline-offset:3px}
 .btn svg{width:16px;height:16px;flex:none}
@@ -89,12 +105,14 @@ td.zero{color:var(--sub)}
 footer{border-top:1px solid var(--line);color:var(--sub);font-size:14px}
 footer .cta{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:var(--s5);margin-bottom:var(--s5);color:var(--ink)}
 footer .cta p{margin:0;max-width:620px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;transition:opacity .2s,transform .2s;pointer-events:none}
+.toast{display:flex;align-items:center;position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.show{pointer-events:auto}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
+<a class="skip" href="#kw">입력으로 바로 가기</a>
 <header class="wrap">
   <div class="eyebrow">무료 · 오픈소스 · 입력 내용 저장 안 함</div>
   <h1>플레이스 문구,<br>올리기 전에 30초 점검</h1>
@@ -125,7 +143,7 @@ footer .cta p{margin:0;max-width:620px}
       <div class="head"><h2 id="h-kw">대표키워드</h2><span class="num" id="kwNum">0 / 5개</span></div>
       <p class="hint">쉼표나 줄바꿈으로 구분합니다. 지역명은 행정동보다 실제로 검색하는 말(광안동보다 광안리)이 유리합니다.</p>
       <label class="sr" for="kw">대표키워드</label>
-      <input type="text" id="kw" placeholder="광안리 오마카세, 광안리 데이트, 광안리 코스요리" autocomplete="off">
+      <input type="text" id="kw" placeholder="광안리 오마카세, 광안리 데이트, 광안리 코스요리…" autocomplete="off">
       <div class="chips" id="kwChips"></div>
       <div class="acts"><button class="btn" id="fixKw" type="button" hidden>허용 안 되는 문자 정리</button></div>
     </div>
@@ -137,7 +155,7 @@ footer .cta p{margin:0;max-width:620px}
       <div class="head"><h2 id="h-desc">상세설명</h2><span class="num" id="descNum">0자</span></div>
       <p class="hint">키워드를 맨 위에 줄줄이 쌓기보다 문장 속에 자연스럽게 넣는 편이 읽히고, 걸리는 표현도 줄어듭니다.</p>
       <label class="sr" for="desc">상세설명</label>
-      <textarea id="desc" placeholder="상세설명을 붙여 넣으세요"></textarea>
+      <textarea id="desc" placeholder="상세설명을 붙여 넣으세요…"></textarea>
       <div class="acts"><button class="btn" id="fixDesc" type="button" hidden>긴 대시를 "-"로 바꾸기</button></div>
     </div>
     <div class="out"><h3>점검 결과</h3><ul class="issues" id="descOut"></ul><div class="preview" id="descPrev" aria-label="표시된 상세설명"></div></div>
@@ -266,13 +284,13 @@ footer .cta p{margin:0;max-width:620px}
     last = { k, d, r, s, kwRaw, desc, dir };
   }
 
-  function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); }
+  function toast(msg, undo){ const t = $('toast'); t.textContent = msg; if (undo) { const b = document.createElement('button'); b.type = 'button'; b.textContent = '되돌리기'; b.onclick = () => { undo(); t.classList.remove('show'); }; t.appendChild(b); } t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), undo ? 5000 : 1800); }
 
   $('fixKw').addEventListener('click', () => { $('kw').value = C.autoFixKeywords($('kw').value).join(', '); run(); toast('대표키워드를 정리했습니다'); });
   $('fixDesc').addEventListener('click', () => { $('desc').value = C.autoFixText($('desc').value); run(); toast('긴 대시를 바꿨습니다'); });
   $('fixDir').addEventListener('click', () => { $('dir').value = C.autoFixText($('dir').value); run(); toast('긴 대시를 바꿨습니다'); });
   $('tplDir').addEventListener('click', () => { $('dir').value = C.DIRECTIONS_TEMPLATE; run(); $('dir').focus(); });
-  $('reset').addEventListener('click', () => { ['kw','desc','dir'].forEach(k => $(k).value = ''); run(); });
+  $('reset').addEventListener('click', () => { const prev = ['kw','desc','dir'].map(k => $(k).value); if (!prev.some(v => v.trim())) return; ['kw','desc','dir'].forEach(k => $(k).value = ''); run(); toast('모두 지웠습니다', () => { ['kw','desc','dir'].forEach((k, i) => $(k).value = prev[i]); run(); }); });
   $('sample').addEventListener('click', () => {
     $('kw').value = '광안리 맛집, 광안리 오마카세, 광안리·데이트, 광안리 코스요리 🍣';
     $('desc').value = '광안리 바다가 보이는 오마카세 — 부산 최고의 숙성 생선을 맛볼 수 있습니다.\n광안리 오마카세, 광안리 데이트, 부산 오마카세, 광안리 코스, 해운대 오마카세\n무조건 상위노출 되는 맛집! 국내산 100% 재료만 씁니다.';
