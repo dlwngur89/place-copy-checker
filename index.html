@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>플레이스 문구 점검기</title>
+<style>
+:root{--bg:#f7f6f3;--card:#fff;--ink:#1f2328;--sub:#6a6f76;--line:#e3e1dc;--ok:#1f7a4d;--warn:#a15c00;--err:#b42318;--accent:#1d4ed8}
+@media (prefers-color-scheme:dark){:root{--bg:#141517;--card:#1d1f22;--ink:#ececec;--sub:#a0a4aa;--line:#2e3135;--ok:#4cc38a;--warn:#f0b35a;--err:#f47067;--accent:#7aa2ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Pretendard","Noto Sans KR",system-ui,sans-serif;word-break:keep-all}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:24px;margin:0 0 4px}p.lead{color:var(--sub);margin:0 0 24px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+h2{font-size:17px;margin:0 0 8px;display:flex;justify-content:space-between;gap:8px}
+h2 small{color:var(--sub);font-weight:400}
+textarea,input{width:100%;font:inherit;color:inherit;background:transparent;border:1px solid var(--line);border-radius:8px;padding:10px}
+textarea{min-height:120px;resize:vertical}
+ul{margin:8px 0 0;padding-left:18px}li.error{color:var(--err)}li.warn{color:var(--warn)}li.info{color:var(--sub)}li.ok{color:var(--ok);list-style:none;margin-left:-18px}
+footer{color:var(--sub);font-size:13px}
+</style>
+</head>
+<body>
+<main>
+<h1>플레이스 문구 점검기</h1>
+<p class="lead">네이버 플레이스 대표키워드·상세설명·찾아오는길을 붙여 넣으면 글자 수와 자주 하는 실수를 바로 보여줍니다. 입력한 내용은 이 브라우저 밖으로 나가지 않습니다.</p>
+
+<section>
+<h2>대표키워드 <small id="kwCount">0 / 5</small></h2>
+<input id="kw" placeholder="쉼표로 구분: 광안리 오마카세, 광안리 데이트, ...">
+<ul id="kwOut"></ul>
+</section>
+
+<section>
+<h2>상세설명 <small id="descCount">0자</small></h2>
+<textarea id="desc" placeholder="상세설명을 붙여 넣으세요"></textarea>
+<ul id="descOut"></ul>
+</section>
+
+<section>
+<h2>찾아오는길 <small id="dirCount">0 / 400자</small></h2>
+<textarea id="dir" placeholder="도보 / 차량 / 내비게이션 / 주차 순서로"></textarea>
+<ul id="dirOut"></ul>
+</section>
+
+<footer>규칙은 실무 운영 기준이며 네이버 공식 기준이 아닙니다. 최신 기준은 네이버 스마트플레이스 고객센터에서 확인하세요. MIT License.</footer>
+</main>
+<script src="checker.js"></script>
+<script>
+const C = window.PlaceCopyChecker;
+const render = (el, issues) => {
+  el.innerHTML = issues.length ? issues.map(i => `<li class="${i.level}">${i.msg.replace(/[<>&]/g, s => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[s]))}</li>`).join('') : '<li class="ok">문제 없음</li>';
+};
+const $ = id => document.getElementById(id);
+function run() {
+  const k = C.checkKeywords($('kw').value.split(','));
+  $('kwCount').textContent = `${k.count} / ${C.DEFAULT_RULES.keywordMax}`; render($('kwOut'), $('kw').value.trim() ? k.issues : []);
+  const d = C.checkText($('desc').value, { field: '상세설명' });
+  $('descCount').textContent = `${d.chars}자`; render($('descOut'), $('desc').value.trim() ? d.issues : []);
+  const r = C.checkDirections($('dir').value);
+  $('dirCount').textContent = `${r.chars} / ${C.DEFAULT_RULES.directionsMaxChars}자`; render($('dirOut'), $('dir').value.trim() ? r.issues : []);
+}
+['kw','desc','dir'].forEach(id => $(id).addEventListener('input', run)); run();
+</script>
+</body>
+</html>
