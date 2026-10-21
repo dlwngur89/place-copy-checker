@@ -1,6 +1,6 @@
 {
   "name": "place-copy-checker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "네이버 플레이스 대표키워드·상세설명·찾아오는길 문구 점검기 (Korean local business listing copy checker)",
   "main": "checker.js",
   "scripts": { "test": "node test/checker.test.js" },
