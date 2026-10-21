@@ -1,0 +1,18 @@
+const assert = require('node:assert');
+const c = require('../checker.js');
+let n = 0; const t = (name, fn) => { fn(); n++; console.log('ok', name); };
+t('글자 수는 공백 포함, 이모지 1자', () => { assert.strictEqual(c.countChars('가 나'), 3); assert.strictEqual(c.countChars('😀a'), 2); });
+t('대표키워드 6개는 오류', () => { assert.ok(c.checkKeywords(['a','b','c','d','e','f']).issues.some(i => i.level === 'error')); });
+t('맛집은 대표키워드 경고', () => { assert.ok(c.checkKeywords(['압구정 맛집']).issues.length > 0); });
+t('가운뎃점 불허', () => { assert.ok(c.checkKeywords(['한우·삼겹살']).issues.some(i => i.msg.includes('·'))); });
+t('허용 특수문자 통과', () => { assert.strictEqual(c.checkKeywords(['광안리 오마카세(예약)']).issues.length, 0); });
+t('찾아오는길 400자 초과', () => { assert.ok(c.checkDirections('도보 차량 내비 주차 ' + 'ㄱ'.repeat(400)).issues.some(i => i.level === 'error')); });
+t('찾아오는길 400자 이내 + 4항목이면 문제 없음', () => { assert.strictEqual(c.checkDirections('도보: 광안역 3번 출구 5분\n차량: 광안대교 진입 전 우회전\n내비게이션: 광안리 오마카세\n주차: 건물 지하 1시간 무료').issues.length, 0); });
+t('400자 정확히는 통과', () => { assert.ok(!c.checkText('ㄱ'.repeat(400), { maxChars: 400 }).issues.length); });
+t('국내산 100%는 오류 아닌 경고', () => { const r = c.checkText('국내산 한우 100%'); assert.ok(r.issues.length && r.issues.every(i => i.level === 'warn')); });
+t('효과 100%는 오류', () => { assert.ok(c.checkText('효과 100% 보장').issues.some(i => i.level === 'error')); });
+t('대표키워드 공백·빈칸 무시', () => { assert.strictEqual(c.checkKeywords(['광안리 오마카세', ' ', '']).count, 1); });
+t('이모지 대표키워드 오류', () => { assert.ok(c.checkKeywords(['광안리 😀']).issues.some(i => i.msg.includes('이모지'))); });
+t('보장 표현 감지', () => { assert.ok(c.checkText('무조건 상위노출 해드립니다').issues.length > 0); });
+t('긴 대시 감지', () => { assert.ok(c.checkText('메뉴 — 안내').issues.length > 0); });
+console.log(`\n${n} passed`);
