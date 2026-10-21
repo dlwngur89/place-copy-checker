@@ -3,63 +3,297 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>플레이스 문구 점검기</title>
+<title>플레이스 문구 점검기 · 네이버 플레이스 대표키워드·상세설명·찾아오는길</title>
+<meta name="description" content="네이버 플레이스 대표키워드·상세설명·찾아오는길을 붙여 넣으면 글자 수, 금지 문자, 업종별 금지 표현(병의원·화장품·식품)을 바로 표시합니다. 무료·오픈소스, 입력 내용은 브라우저 밖으로 나가지 않습니다.">
+<meta property="og:title" content="플레이스 문구 점검기">
+<meta property="og:description" content="대표키워드·상세설명·찾아오는길, 올리기 전에 30초 점검. 업종별 금지 표현까지.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-:root{--bg:#f7f6f3;--card:#fff;--ink:#1f2328;--sub:#6a6f76;--line:#e3e1dc;--ok:#1f7a4d;--warn:#a15c00;--err:#b42318;--accent:#1d4ed8}
-@media (prefers-color-scheme:dark){:root{--bg:#141517;--card:#1d1f22;--ink:#ececec;--sub:#a0a4aa;--line:#2e3135;--ok:#4cc38a;--warn:#f0b35a;--err:#f47067;--accent:#7aa2ff}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Pretendard","Noto Sans KR",system-ui,sans-serif;word-break:keep-all}
-main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
-h1{font-size:24px;margin:0 0 4px}p.lead{color:var(--sub);margin:0 0 24px}
-section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
-h2{font-size:17px;margin:0 0 8px;display:flex;justify-content:space-between;gap:8px}
-h2 small{color:var(--sub);font-weight:400}
-textarea,input{width:100%;font:inherit;color:inherit;background:transparent;border:1px solid var(--line);border-radius:8px;padding:10px}
-textarea{min-height:120px;resize:vertical}
-ul{margin:8px 0 0;padding-left:18px}li.error{color:var(--err)}li.warn{color:var(--warn)}li.info{color:var(--sub)}li.ok{color:var(--ok);list-style:none;margin-left:-18px}
-footer{color:var(--sub);font-size:13px}
+:root{
+  --paper:#f3efe6;--card:#fffdf8;--ink:#1b1a17;--sub:#5f5a50;--line:#ddd6c8;--soft:#ebe5d8;
+  --accent:#1f5e4a;--accent-ink:#ffffff;--err:#b3261e;--err-bg:#fbe3df;--warn:#8a5a00;--warn-bg:#fbefd2;--ok:#1f6b45;--info:#4a5568;
+  --r:14px;--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:64px;
+}
+@media (prefers-color-scheme:dark){:root{--paper:#141412;--card:#1d1c19;--ink:#efeae0;--sub:#a8a193;--line:#34312b;--soft:#26241f;--accent:#5fb595;--accent-ink:#0f1a15;--err:#ff8a7f;--err-bg:#3a1c19;--warn:#f0c065;--warn-bg:#3a2e14;--ok:#6fd0a0;--info:#b6bdc8}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 "Pretendard Variable",Pretendard,"Noto Sans KR",system-ui,sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+a{color:inherit}
+a.btn{text-decoration:none}
+.wrap{max-width:1160px;margin:0 auto;padding:0 16px}
+[hidden]{display:none!important}
+header.wrap{padding-top:var(--s7);padding-bottom:var(--s5)}
+footer.wrap{padding-top:var(--s6);padding-bottom:var(--s7)}
+.eyebrow{font-size:13px;letter-spacing:.08em;color:var(--sub);text-transform:uppercase;font-weight:600}
+h1{font-size:clamp(32px,6vw,56px);line-height:1.1;letter-spacing:-.03em;margin:var(--s2) 0 var(--s3);font-weight:800}
+.lead{font-size:clamp(16px,2vw,19px);color:var(--sub);max-width:640px;margin:0}
+.toolbar{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center;margin-top:var(--s5)}
+.seg{display:flex;gap:4px;padding:4px;background:var(--soft);border-radius:999px;max-width:100%;overflow-x:auto;scrollbar-width:none}.seg::-webkit-scrollbar{display:none}
+.seg button{border:0;background:transparent;color:var(--sub);font:inherit;font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;min-height:40px;white-space:nowrap;flex:none}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:9px 14px;border-radius:10px;cursor:pointer;min-height:44px}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{border-color:transparent;background:transparent;text-decoration:underline;text-underline-offset:3px}
+.btn svg{width:16px;height:16px;flex:none}
+.basis:empty{display:none}
+.basis{margin:var(--s3) 0 0;font-size:14px;color:var(--sub);max-width:760px}
+.summary{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.summary .wrap{display:flex;align-items:center;gap:var(--s3);padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:15px}
+.dot{width:10px;height:10px;border-radius:50%}
+.pill.e .dot{background:var(--err)}.pill.w .dot{background:var(--warn)}.pill.i .dot{background:var(--info)}
+.verdict{margin-left:auto;font-size:14px;color:var(--sub)}
+.verdict strong{color:var(--ink)}
+main{padding:var(--s5) 0 var(--s8)}
+.row{display:grid;grid-template-columns:1fr;gap:var(--s4);background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:var(--s5);margin-bottom:var(--s4)}
+@media (min-width:960px){.row{grid-template-columns:1.05fr 1fr;gap:var(--s6);padding:var(--s6)}}
+.head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s3);margin-bottom:var(--s2)}
+h2{font-size:22px;letter-spacing:-.02em;margin:0;font-weight:800}
+.num{font-variant-numeric:tabular-nums;font-weight:700;color:var(--sub);white-space:nowrap}
+.num.over{color:var(--err)}
+.hint{font-size:14px;color:var(--sub);margin:0 0 var(--s3)}
+label.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+textarea,input[type=text]{width:100%;font:inherit;color:inherit;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;outline:none}
+textarea:focus,input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+textarea{min-height:180px;resize:vertical}
+.bar{height:6px;background:var(--soft);border-radius:99px;margin-top:var(--s2);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .2s}
+.bar.over i{background:var(--err)}
+.acts{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:var(--s3)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:14px;font-weight:600;border:1px solid var(--line);background:var(--paper)}
+.chip svg{width:14px;height:14px}
+.chip.bad{border-color:var(--err);color:var(--err);background:var(--err-bg)}
+.chip.ok svg{color:var(--ok)}
+.out:has(.issues:empty) h3{display:none}
+.out h3{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);margin:0 0 var(--s2);font-weight:700}
+.issues{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.issues li{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start;font-size:15px;padding:8px 10px;border-radius:8px;background:var(--paper)}
+.issues li svg{width:18px;height:18px;margin-top:3px}
+.issues li.error{color:var(--err);background:var(--err-bg)}
+.issues li.warn{color:var(--warn);background:var(--warn-bg)}
+.issues li.info{color:var(--info)}
+.issues li.ok{color:var(--ok)}
+.preview{margin-top:var(--s4);padding:var(--s3) var(--s4);border:1px dashed var(--line);border-radius:10px;white-space:pre-wrap;font-size:15px;max-height:260px;overflow:auto}
+.preview:empty{display:none}
+mark{background:var(--warn-bg);color:inherit;border-bottom:2px solid var(--warn);padding:0 1px;border-radius:2px}
+mark.error{background:var(--err-bg);border-bottom-color:var(--err)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--sub);font-weight:700}
+td.n{font-variant-numeric:tabular-nums;font-weight:700}
+td.zero{color:var(--sub)}
+.empty{color:var(--sub);font-size:15px;margin:0}
+footer{border-top:1px solid var(--line);color:var(--sub);font-size:14px}
+footer .cta{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:var(--s5);margin-bottom:var(--s5);color:var(--ink)}
+footer .cta p{margin:0;max-width:620px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<main>
-<h1>플레이스 문구 점검기</h1>
-<p class="lead">네이버 플레이스 대표키워드·상세설명·찾아오는길을 붙여 넣으면 글자 수와 자주 하는 실수를 바로 보여줍니다. 입력한 내용은 이 브라우저 밖으로 나가지 않습니다.</p>
+<header class="wrap">
+  <div class="eyebrow">무료 · 오픈소스 · 입력 내용 저장 안 함</div>
+  <h1>플레이스 문구,<br>올리기 전에 30초 점검</h1>
+  <p class="lead">네이버 플레이스 대표키워드·상세설명·찾아오는길을 붙여 넣으면 글자 수, 쓸 수 없는 문자, 업종별로 조심해야 할 표현을 문장 위에 바로 표시합니다.</p>
+  <div class="toolbar">
+    <div class="seg" role="group" aria-label="업종 선택" id="preset"></div>
+  </div>
+  <div class="toolbar">
+    <button class="btn primary" id="sample" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>예시로 먼저 보기</button>
+    <button class="btn" id="copyReport" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>점검 결과 복사</button>
+    <button class="btn ghost" id="reset" type="button">모두 지우기</button>
+  </div>
+  <p class="basis" id="basis"></p>
+</header>
 
-<section>
-<h2>대표키워드 <small id="kwCount">0 / 5</small></h2>
-<input id="kw" placeholder="쉼표로 구분: 광안리 오마카세, 광안리 데이트, ...">
-<ul id="kwOut"></ul>
-</section>
+<div class="summary" aria-live="polite">
+  <div class="wrap">
+    <span class="pill e"><span class="dot"></span>오류 <span id="sumE">0</span></span>
+    <span class="pill w"><span class="dot"></span>주의 <span id="sumW">0</span></span>
+    <span class="pill i"><span class="dot"></span>확인 <span id="sumI">0</span></span>
+    <span class="verdict" id="verdict">문구를 붙여 넣으면 바로 점검합니다</span>
+  </div>
+</div>
 
-<section>
-<h2>상세설명 <small id="descCount">0자</small></h2>
-<textarea id="desc" placeholder="상세설명을 붙여 넣으세요"></textarea>
-<ul id="descOut"></ul>
-</section>
+<main class="wrap">
+  <section class="row" aria-labelledby="h-kw">
+    <div>
+      <div class="head"><h2 id="h-kw">대표키워드</h2><span class="num" id="kwNum">0 / 5개</span></div>
+      <p class="hint">쉼표나 줄바꿈으로 구분합니다. 지역명은 행정동보다 실제로 검색하는 말(광안동보다 광안리)이 유리합니다.</p>
+      <label class="sr" for="kw">대표키워드</label>
+      <input type="text" id="kw" placeholder="광안리 오마카세, 광안리 데이트, 광안리 코스요리" autocomplete="off">
+      <div class="chips" id="kwChips"></div>
+      <div class="acts"><button class="btn" id="fixKw" type="button" hidden>허용 안 되는 문자 정리</button></div>
+    </div>
+    <div class="out"><h3>점검 결과</h3><ul class="issues" id="kwOut"></ul></div>
+  </section>
 
-<section>
-<h2>찾아오는길 <small id="dirCount">0 / 400자</small></h2>
-<textarea id="dir" placeholder="도보 / 차량 / 내비게이션 / 주차 순서로"></textarea>
-<ul id="dirOut"></ul>
-</section>
+  <section class="row" aria-labelledby="h-desc">
+    <div>
+      <div class="head"><h2 id="h-desc">상세설명</h2><span class="num" id="descNum">0자</span></div>
+      <p class="hint">키워드를 맨 위에 줄줄이 쌓기보다 문장 속에 자연스럽게 넣는 편이 읽히고, 걸리는 표현도 줄어듭니다.</p>
+      <label class="sr" for="desc">상세설명</label>
+      <textarea id="desc" placeholder="상세설명을 붙여 넣으세요"></textarea>
+      <div class="acts"><button class="btn" id="fixDesc" type="button" hidden>긴 대시를 "-"로 바꾸기</button></div>
+    </div>
+    <div class="out"><h3>점검 결과</h3><ul class="issues" id="descOut"></ul><div class="preview" id="descPrev" aria-label="표시된 상세설명"></div></div>
+  </section>
 
-<footer>규칙은 실무 운영 기준이며 네이버 공식 기준이 아닙니다. 최신 기준은 네이버 스마트플레이스 고객센터에서 확인하세요. MIT License.</footer>
+  <section class="row" aria-labelledby="h-dir">
+    <div>
+      <div class="head"><h2 id="h-dir">찾아오는길</h2><span class="num" id="dirNum">0 / 400자</span></div>
+      <p class="hint">도보 · 차량 · 내비게이션 · 주차 순서로 쓰면 손님이 헤매지 않습니다. 공백 포함 400자.</p>
+      <label class="sr" for="dir">찾아오는길</label>
+      <textarea id="dir" placeholder="도보: 광안역 3번 출구에서 5분&#10;차량: ...&#10;내비게이션: ...&#10;주차: ..."></textarea>
+      <div class="bar" id="dirBar"><i></i></div>
+      <div class="acts"><button class="btn" id="tplDir" type="button">빈 양식 넣기</button><button class="btn" id="fixDir" type="button" hidden>긴 대시를 "-"로 바꾸기</button></div>
+    </div>
+    <div class="out"><h3>점검 결과</h3><ul class="issues" id="dirOut"></ul><div class="preview" id="dirPrev" aria-label="표시된 찾아오는길"></div></div>
+  </section>
+
+  <section class="row" aria-labelledby="h-use">
+    <div>
+      <div class="head"><h2 id="h-use">키워드가 본문에 몇 번 나오나</h2></div>
+      <p class="hint">대표키워드가 상세설명·찾아오는길에 실제로 몇 번 들어갔는지 셉니다. 많을수록 좋은 게 아니라, 한 번도 없는지와 억지로 반복했는지를 보는 용도입니다.</p>
+    </div>
+    <div class="out" id="useOut"><p class="empty">대표키워드를 넣으면 표가 나옵니다.</p></div>
+  </section>
 </main>
+
+<footer class="wrap">
+  <div class="cta">
+    <p><strong>규칙이 틀렸거나, 더 넣었으면 하는 게 있나요?</strong><br>코딩을 몰라도 양식에 한 줄만 적으면 됩니다. 카카오맵 규칙, 지역명 짝(행정동 → 실제 검색어), 업종별 표현을 같이 만들고 있습니다.</p>
+    <a class="btn primary" href="https://github.com/dlwngur89/place-copy-checker/issues/new/choose" target="_blank" rel="noopener">규칙 제안하기</a>
+  </div>
+  <p>점검 기준은 실무 운영 기준이며 네이버 공식 기준이 아닙니다. 업종별 표현은 법령 조문을 요약한 참고용이고, 최종 판단은 법령 원문과 광고 심의 기준을 따르세요. 입력한 문구는 이 브라우저에만 임시 저장되며 외부로 전송되지 않습니다.</p>
+  <p><a href="https://github.com/dlwngur89/place-copy-checker" target="_blank" rel="noopener">GitHub</a> · MIT License · 만든 곳 JHLLIANCE</p>
+</footer>
+<div class="toast" id="toast" role="status"></div>
+
 <script src="checker.js"></script>
 <script>
-const C = window.PlaceCopyChecker;
-const render = (el, issues) => {
-  el.innerHTML = issues.length ? issues.map(i => `<li class="${i.level}">${i.msg.replace(/[<>&]/g, s => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[s]))}</li>`).join('') : '<li class="ok">문제 없음</li>';
-};
-const $ = id => document.getElementById(id);
-function run() {
-  const k = C.checkKeywords($('kw').value.split(','));
-  $('kwCount').textContent = `${k.count} / ${C.DEFAULT_RULES.keywordMax}`; render($('kwOut'), $('kw').value.trim() ? k.issues : []);
-  const d = C.checkText($('desc').value, { field: '상세설명' });
-  $('descCount').textContent = `${d.chars}자`; render($('descOut'), $('desc').value.trim() ? d.issues : []);
-  const r = C.checkDirections($('dir').value);
-  $('dirCount').textContent = `${r.chars} / ${C.DEFAULT_RULES.directionsMaxChars}자`; render($('dirOut'), $('dir').value.trim() ? r.issues : []);
-}
-['kw','desc','dir'].forEach(id => $(id).addEventListener('input', run)); run();
+(function(){
+  const C = window.PlaceCopyChecker;
+  const $ = id => document.getElementById(id);
+  const ICON = {
+    error:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
+    warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>',
+    info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+    ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>'
+  };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  let preset = 'general';
+  const store = {
+    get(k){ try { return localStorage.getItem('pcc:' + k); } catch(e) { return null; } },
+    set(k,v){ try { localStorage.setItem('pcc:' + k, v); } catch(e) {} }
+  };
+
+  // 업종 버튼
+  Object.entries(C.PRESETS).forEach(([key, p]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = p.label; b.dataset.key = key;
+    b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', () => { preset = key; store.set('preset', key); run(); });
+    $('preset').appendChild(b);
+  });
+
+  function list(el, issues, emptyText){
+    if (!issues) { el.innerHTML = ''; return; }
+    el.innerHTML = issues.length
+      ? issues.map(i => `<li class="${i.level}">${ICON[i.level]}<span>${esc(i.msg)}</span></li>`).join('')
+      : `<li class="ok">${ICON.ok}<span>${emptyText || '걸리는 것 없음'}</span></li>`;
+  }
+  function highlight(el, text, marks){
+    if (!text.trim() || !marks.length) { el.innerHTML = ''; return; }
+    const sorted = marks.slice().sort((a,b) => a.range[0]-b.range[0] || (b.level==='error')-(a.level==='error'));
+    let html = '', pos = 0;
+    for (const m of sorted) {
+      const [s, e] = m.range; if (s < pos) continue;
+      html += esc(text.slice(pos, s)) + `<mark class="${m.level}">${esc(text.slice(s, e))}</mark>`; pos = e;
+    }
+    el.innerHTML = html + esc(text.slice(pos));
+  }
+
+  let last = {};
+  function run(){
+    const rules = C.withPreset(preset);
+    document.querySelectorAll('#preset button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.key === preset)));
+    $('basis').textContent = C.PRESETS[preset].basis ? C.PRESETS[preset].basis + (C.PRESETS[preset].cautionNote ? ' ' + C.PRESETS[preset].cautionNote + '.' : '') : '';
+
+    const kwRaw = $('kw').value, desc = $('desc').value, dir = $('dir').value;
+    ['kw','desc','dir'].forEach(k => store.set(k, $(k).value));
+
+    const k = C.checkKeywords(kwRaw, rules);
+    $('kwNum').textContent = `${k.count} / ${rules.keywordMax}개`;
+    $('kwNum').classList.toggle('over', k.count > rules.keywordMax);
+    $('kwChips').innerHTML = k.keywords.map(x => `<span class="chip ${x.ok ? 'ok' : 'bad'}">${x.ok ? ICON.ok : ICON.error}${esc(x.keyword)}</span>`).join('');
+    list($('kwOut'), kwRaw.trim() ? k.issues : null);
+    $('fixKw').hidden = !k.issues.some(i => i.code === 'kw-char' || i.code === 'kw-emoji');
+
+    const d = C.checkText(desc, { field: '상세설명' }, rules);
+    const blocks = C.detectKeywordBlocks(desc);
+    blocks.forEach(b => d.issues.push({ level: 'warn', code: 'kw-block', msg: `${b.line}번째 줄: 키워드를 줄줄이 나열했습니다. 문장 속에 나눠 넣는 편이 좋습니다.` }));
+    $('descNum').textContent = `${d.chars.toLocaleString()}자`;
+    list($('descOut'), desc.trim() ? d.issues : null);
+    highlight($('descPrev'), desc, d.marks);
+    $('fixDesc').hidden = !d.issues.some(i => i.fixable);
+
+    const r = C.checkDirections(dir, rules);
+    $('dirNum').textContent = `${r.chars} / ${rules.directionsMaxChars}자`;
+    const over = r.chars > rules.directionsMaxChars;
+    $('dirNum').classList.toggle('over', over); $('dirBar').classList.toggle('over', over);
+    $('dirBar').firstElementChild.style.width = Math.min(100, r.chars / rules.directionsMaxChars * 100) + '%';
+    list($('dirOut'), dir.trim() ? r.issues : null);
+    highlight($('dirPrev'), dir, r.marks);
+    $('fixDir').hidden = !r.issues.some(i => i.fixable);
+    $('tplDir').hidden = !!dir.trim();
+
+    const kws = k.keywords.map(x => x.keyword);
+    if (kws.length) {
+      const u = C.keywordUsage(kws, { desc, dir });
+      $('useOut').innerHTML = `<table><thead><tr><th>대표키워드</th><th>상세설명</th><th>찾아오는길</th></tr></thead><tbody>${u.map(x => `<tr><td>${esc(x.keyword)}</td><td class="n ${x.counts.desc ? '' : 'zero'}">${x.counts.desc}회</td><td class="n ${x.counts.dir ? '' : 'zero'}">${x.counts.dir}회</td></tr>`).join('')}</tbody></table>`;
+    } else $('useOut').innerHTML = '<p class="empty">대표키워드를 넣으면 표가 나옵니다.</p>';
+
+    const active = [kwRaw.trim() && k, desc.trim() && d, dir.trim() && r].filter(Boolean);
+    const s = C.summarize(active);
+    $('sumE').textContent = s.error; $('sumW').textContent = s.warn; $('sumI').textContent = s.info;
+    $('verdict').innerHTML = !active.length ? '문구를 붙여 넣으면 바로 점검합니다'
+      : s.error ? `<strong>올리기 전에 고칠 것 ${s.error}개</strong>` : s.warn ? '<strong>오류 없음</strong> · 주의 표현만 한 번 더 확인' : '<strong>걸리는 것 없음</strong>';
+    last = { k, d, r, s, kwRaw, desc, dir };
+  }
+
+  function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); }
+
+  $('fixKw').addEventListener('click', () => { $('kw').value = C.autoFixKeywords($('kw').value).join(', '); run(); toast('대표키워드를 정리했습니다'); });
+  $('fixDesc').addEventListener('click', () => { $('desc').value = C.autoFixText($('desc').value); run(); toast('긴 대시를 바꿨습니다'); });
+  $('fixDir').addEventListener('click', () => { $('dir').value = C.autoFixText($('dir').value); run(); toast('긴 대시를 바꿨습니다'); });
+  $('tplDir').addEventListener('click', () => { $('dir').value = C.DIRECTIONS_TEMPLATE; run(); $('dir').focus(); });
+  $('reset').addEventListener('click', () => { ['kw','desc','dir'].forEach(k => $(k).value = ''); run(); });
+  $('sample').addEventListener('click', () => {
+    $('kw').value = '광안리 맛집, 광안리 오마카세, 광안리·데이트, 광안리 코스요리 🍣';
+    $('desc').value = '광안리 바다가 보이는 오마카세 — 부산 최고의 숙성 생선을 맛볼 수 있습니다.\n광안리 오마카세, 광안리 데이트, 부산 오마카세, 광안리 코스, 해운대 오마카세\n무조건 상위노출 되는 맛집! 국내산 100% 재료만 씁니다.';
+    $('dir').value = '도보: 광안역 3번 출구에서 바다 방향으로 5분\n내비게이션: 광안리 오마카세 검색\n주차: 건물 뒤편 공영주차장 이용';
+    run(); toast('예시 문구로 점검했습니다');
+    document.querySelector('main').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  });
+  $('copyReport').addEventListener('click', async () => {
+    const L = []; const pr = C.PRESETS[preset].label;
+    L.push(`[플레이스 문구 점검 결과] 업종: ${pr}`);
+    L.push(`오류 ${last.s.error} / 주의 ${last.s.warn} / 확인 ${last.s.info}`);
+    const sec = (name, res, raw) => { if (!raw || !raw.trim()) return; L.push(''); L.push(`■ ${name}`); (res.issues.length ? res.issues : [{ level:'ok', msg:'걸리는 것 없음' }]).forEach(i => L.push(`- ${({error:'[오류]',warn:'[주의]',info:'[확인]',ok:'[OK]'})[i.level]} ${i.msg}`)); };
+    sec('대표키워드', last.k, last.kwRaw); sec('상세설명', last.d, last.desc); sec('찾아오는길', last.r, last.dir);
+    L.push(''); L.push('점검: https://dlwngur89.github.io/place-copy-checker/');
+    try { await navigator.clipboard.writeText(L.join('\n')); toast('점검 결과를 복사했습니다'); } catch(e) { toast('복사가 막혀 있습니다. 직접 선택해 복사해 주세요'); }
+  });
+
+  ['kw','desc','dir'].forEach(id => { const v = store.get(id); if (v) $(id).value = v; $(id).addEventListener('input', run); });
+  const sp = store.get('preset'); if (sp && C.PRESETS[sp]) preset = sp;
+  run();
+})();
 </script>
 </body>
 </html>
