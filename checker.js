@@ -49,6 +49,14 @@
     },
   };
 
+  // 걸린 표현 바로 뒤(같은 문장, 14자 안)에 부정 표현이 오면 "부정 문맥"으로 보고 오류·주의 대신 확인으로 낮춘다.
+  // 예) "치료 목적이 아닙니다", "효과를 보장하지 않습니다"
+  const NEGATION_RE = /(아닙니다|아니에요|아님|아니며|아니고|않습니다|않아요|않음|않으며|않고|하지 마세요|금지)/;
+  function isNegated(text, end) {
+    const tail = text.slice(end, end + 14).split(/[.!?\n。]/)[0];
+    return NEGATION_RE.test(tail);
+  }
+
   const EMOJI_RE = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u;
   const EMOJI_RE_G = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu;
 
@@ -120,8 +128,11 @@
       }
     }
     const bannedHit = [];
+    const negatedNotes = [];
     for (const p of rules.bannedPhrases) {
-      const hits = findAll(text, p);
+      const all = findAll(text, p);
+      const hits = all.filter(([, e]) => !isNegated(text, e));
+      if (all.length > hits.length) negatedNotes.push(p);
       if (hits.length) {
         bannedHit.push(p);
         issues.push({ level: 'error', code: 'banned', phrase: p, msg: `${field}: "${p}" 금지 표현 (보장·단정·오인 표현)` });
@@ -129,11 +140,17 @@
       }
     }
     for (const p of rules.cautionPhrases) {
-      const hits = findAll(text, p).filter(([s, e]) => !bannedHit.some(b => findAll(text, b).some(([bs, be]) => s >= bs && e <= be)));
+      const inBanned = ([s, e]) => rules.bannedPhrases.some(b => findAll(text, b).some(([bs, be]) => s >= bs && e <= be));
+      const all = findAll(text, p).filter(r => !inBanned(r));
+      const hits = all.filter(([, e]) => !isNegated(text, e));
+      if (all.length > hits.length) negatedNotes.push(p);
       if (hits.length) {
         issues.push({ level: 'warn', code: 'caution', phrase: p, msg: `${field}: "${p}"는 근거·인증이 있을 때만 쓰세요` });
         hits.forEach(r => marks.push({ range: r, level: 'warn' }));
       }
+    }
+    for (const p of [...new Set(negatedNotes)]) {
+      issues.push({ level: 'info', code: 'negated', phrase: p, msg: `${field}: "${p}"는 부정 문장으로 보여 제외했습니다. 문맥만 한 번 확인하세요` });
     }
     return { chars: n, issues, marks };
   }
@@ -191,7 +208,7 @@
 
   const DIRECTIONS_TEMPLATE = '도보: (가까운 역) ○번 출구에서 ○분\n차량: (주요 도로·랜드마크 기준) 진입 방법\n내비게이션: "(검색어)" 또는 (도로명 주소)\n주차: (위치) / (무료 시간·요금)';
 
-  const api = { DEFAULT_RULES, PRESETS, DIRECTIONS_TEMPLATE, withPreset, countChars, findAll, splitKeywords, checkKeywords, checkText, checkDirections, keywordUsage, detectKeywordBlocks, autoFixText, autoFixKeywords, summarize };
+  const api = { isNegated, DEFAULT_RULES, PRESETS, DIRECTIONS_TEMPLATE, withPreset, countChars, findAll, splitKeywords, checkKeywords, checkText, checkDirections, keywordUsage, detectKeywordBlocks, autoFixText, autoFixKeywords, summarize };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.PlaceCopyChecker = api;
 })(typeof self !== 'undefined' ? self : this);
